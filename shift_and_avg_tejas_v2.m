@@ -12,7 +12,7 @@ params.min_rad = 20;
 params.max_rad = 50;
 params.half_window = 1;
 
-%{
+
 data_file = 'datasets/data_30Aug_2';
 start_frame = 8;
 params.min_rad = 30;
@@ -45,12 +45,14 @@ for i=start_frame: size(imageList,1)
     img_out = shift_filter_tejas(img_base,params);
     
     [m,n]=size(img_out);
+    
+    %{
     % circle detection
     [circle, edge_points] = circle_detection_wanwen_v2(img_out,params,'circle');
     if ~isempty(circle)
         img_out(round(circle.xc),round(circle.yc)) = 255; % centroid
-        for i = 1:size(edge_points,1)
-            img_out(round(edge_points(i,1)),round(edge_points(i,2))) = 100; % detected points in img for fitting
+        for pt = 1:size(edge_points,1)
+            img_out(round(edge_points(pt,1)),round(edge_points(pt,2))) = 100; % detected points in img for fitting
         end
         for theta = 0:0.01:2*pi % fitted circle
             a = round(circle.xc+circle.rad*cos(theta));
@@ -63,21 +65,21 @@ for i=start_frame: size(imageList,1)
     else
         init_flag = 0; % select new start point
     end
+    %}
     
-    %{
-    [ellipse, edge_points] = circle_detection_wanwen_v2(img_out,params.start_point,'ellipse');
+    [ellipse, edge_points] = circle_detection_wanwen_v2(img_out,params,'ellipse');
     if ~isempty(ellipse)
-        for i = 1:size(edge_points,1)
-            img_out(round(edge_points(i,1)),round(edge_points(i,2))) = 100;
+        for pt = 1:size(edge_points,1)
+            img_out(round(edge_points(pt,1)),round(edge_points(pt,2))) = 100;
         end
         if 0<ellipse.xc && ellipse.xc<m && ellipse.yc>0 && ellipse.yc<n
             img_out(round(ellipse.xc),round(ellipse.yc)) = 255;
         end
         for theta = 0:0.01:2*pi
-            x = ellipse.xc+ellipse.xa*cos(theta);
-            y = ellipse.yc+ellipse.ya*sin(theta);
-            a = round(x*cos(ellipse.tilt)+y*sin(ellipse.tilt));
-            b = round(x*sin(ellipse.tilt)-y*cos(ellipse.tilt));
+            x = ellipse.xc+ellipse.a*cos(theta)*cos(ellipse.alpha)-ellipse.b*sin(theta)*sin(ellipse.alpha);
+            y = ellipse.yc+ellipse.a*cos(theta)*sin(ellipse.alpha)+ellipse.b*sin(theta)*cos(ellipse.alpha);
+            a = round(x);
+            b = round(y);
             if a > 0 && a<m && b>0 && b<n
                 img_out(a,b) = 255;
             end
