@@ -66,7 +66,7 @@ if strcmp(type,'circle')
     end
 else 
     if size(edge_points,1)>6
-        ellipse = fit_ellipse(edge_points); % ellipse fitting (doesn't work now)
+        ellipse = fit_ellipse_v3(edge_points); % ellipse fitting (doesn't work now)
     else
         ellipse = [];
     end
